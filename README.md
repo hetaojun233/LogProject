@@ -15,34 +15,3 @@ Hive：
 1.ETL
 2.把ETL数据加载到分区表里
 3.各个维度统计结果数据输出到各自维度的表里
-
-//创建分区表
-create external table trackinfo(
-ip string,
-country string,
-province string,
-city string,
-url string,
-time string,
-page string
-) partitioned by (day string)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
-location '/project/trackinfo/';
-
-//加载数据到分区表
-LOAD DATA INPATH 'hdfs://hadoop001:8020/project/input/etl/part-r-00000' OVERWRITE INTO TABLE trackinfo partition(day='2013-07-21');
-
-
-//查看数据
-hive> select count(*) from trackinfo;
-
-
-//创建省份表
-create external table trackinfo_province(
-province string,
-cnt bigint
-) partitioned by (day string)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
-
-//把省份统计数据输出到目标表
-insert overwrite table trackinfo_province partition(day='2013-07-21') select province,count(*) as cnt from trackinfo where day='2013-07-21' group by province;
